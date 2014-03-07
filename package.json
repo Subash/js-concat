@@ -1,0 +1,25 @@
+{
+  "name": "js-cat",
+  "version": "0.1.0",
+  "description": "Concatenate Javascript Files With SourceMaps",
+  "main": "index.js",
+  "dependencies": {
+    "source-map": "~0.1.33"
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sbspk/js-cat"
+  },
+  "keywords": [
+    "javascript",
+    "concatenation",
+    "concat"
+  ],
+  "author": "https://twitter.com/sbspk",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/sbspk/js-cat/issues"
+  },
+  "homepage": "https://github.com/sbspk/js-cat"
+}
