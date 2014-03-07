@@ -39,8 +39,6 @@ jsCat.concatFiles(['test1.js', 'test2.js'], { mapFilePath : 'output.min.map' }, 
 
 ```
 
-The files are concatenated in the order of the array.
-
 __License__
 
 MIT
