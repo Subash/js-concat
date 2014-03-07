@@ -7,7 +7,7 @@ var SourceMapGenerator = sourcemap.SourceMapGenerator;
 var fs = require('fs');
 var path = require('path');
 
-function _concatFromSource(files, options) {
+function _concatSource(files, options) {
 	
 	var sourceMapNode = new SourceMapNode();
 	
@@ -75,13 +75,13 @@ function _concatFromSource(files, options) {
 	}
 }
 
-exports.concatFromSource = function(files, options, callback) {
+exports.concatSource = function(files, options, callback) {
 	
 	try{
 		
 		process.nextTick(function() {
 			
-			callback(null, concatFromSource(files, options))
+			callback(null, _concatSource(files, options))
 			
 		})
 		
@@ -96,7 +96,7 @@ exports.concatFromSource = function(files, options, callback) {
 	
 }
 
-function concatFromFiles(files, options, callback) {
+function concatFiles(files, options, callback) {
 	
 	var filesToConcat = [];
 	
@@ -139,7 +139,7 @@ function concatFromFiles(files, options, callback) {
 				
 						try {
 					
-							callback(null, _concatFromSource(filesToConcat, options));
+							callback(null, _concatSource(filesToConcat, options));
 					
 						} catch (err) {
 					
@@ -191,4 +191,4 @@ function concatFromFiles(files, options, callback) {
 	});
 }
 
-exports.concatFromFiles = concatFromFiles;
+exports.concatFiles = concatFiles;

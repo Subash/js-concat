@@ -19,7 +19,7 @@ var files = [
 	{code : '<Javascript Source Code>', map: '<optional><old sourcemap>', path: '<Path of File>'}
 ]
 
-jsCat.concatFromSource(files, { mapFilePath : 'output.min.map' }, function(err, data) {
+jsCat.concatSource(files, { mapFilePath : 'output.min.map' }, function(err, data) {
 	
 	if(err) return console.log(err);
 	
@@ -29,7 +29,7 @@ jsCat.concatFromSource(files, { mapFilePath : 'output.min.map' }, function(err, 
 
 //From Files List
 
-jsCat.concatFromSource(['test1.js', 'test2.js'], { mapFilePath : 'output.min.map' }, function(err, data) {
+jsCat.concatFiles(['test1.js', 'test2.js'], { mapFilePath : 'output.min.map' }, function(err, data) {
 	
 	if(err) return console.log(err);
 	
