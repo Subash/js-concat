@@ -8,9 +8,9 @@ npm install js-cat
 
 __Usage__
 
-```js
+```javascript
 
-jsCat = require('js-cat);
+jsCat = require('js-cat');
 
 //From Code
 
