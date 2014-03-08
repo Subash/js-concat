@@ -30,7 +30,7 @@ function _concatSource(files, options) {
             map.file = filePath;
 
             map.sources = map.sources.map(function (source) {
-                return path.join(path.dirname(filePath), source);
+                return path.resolve(path.dirname(filePath), source);
             });
 
             delete map.sourceRoot;
@@ -39,12 +39,15 @@ function _concatSource(files, options) {
 
             lines.forEach(function (line, k) {
 
-                var position = consumer.originalPositionFor({
-                    line: k + 1,
-                    column: 0
-                });
+                var cols = line.split('').forEach(function(col, c) {
 
-                sourceMapNode.add(new SourceMapNode(position.line, position.column, position.source, line.replace(/[@#]\s+sourceMappingURL=[\w\.]+/, ''), position.name));
+                    var position = consumer.originalPositionFor({
+                        line: k + 1,
+                        column: c + 1
+                    });
+
+                    sourceMapNode.add(new SourceMapNode(position.line, position.column, position.source, col, position.name));
+                });
 
             });
 
@@ -54,7 +57,15 @@ function _concatSource(files, options) {
 
             lines.forEach(function (line, k) {
 
-                sourceMapNode.add(new SourceMapNode(k + 1, 0, filePath, line.replace(/[@#]\s+sourceMappingURL=[\w\.]+/, '')));
+                var cols = line.split('').forEach(function(col, c) {
+
+                    var position = consumer.originalPositionFor({
+                        line: k + 1,
+                        column: c + 1
+                    });
+
+                    sourceMapNode.add(new SourceMapNode(position.line, position.column, position.source, col, position.name));
+                });
 
             });
 
@@ -72,7 +83,7 @@ function _concatSource(files, options) {
     return {
         code: sourceCodeMap.code,
         map: generator.toString()
-    }
+    };
 }
 
 exports.concatSource = function (files, options, callback) {
@@ -81,9 +92,9 @@ exports.concatSource = function (files, options, callback) {
 
         process.nextTick(function () {
 
-            callback(null, _concatSource(files, options))
+            callback(null, _concatSource(files, options));
 
-        })
+        });
 
     } catch (err) {
 
@@ -91,10 +102,10 @@ exports.concatSource = function (files, options, callback) {
 
             callback(err);
 
-        })
+        });
     }
 
-}
+};
 
 function concatFiles(files, options, callback) {
 
@@ -131,7 +142,7 @@ function concatFiles(files, options, callback) {
                         sourceMapPath = /\/\/[@#]\s+sourceMappingURL=(.+)/.exec(line)[1];
                     }
 
-                })
+                });
 
                 var runIfAll = function () {
 
@@ -149,7 +160,7 @@ function concatFiles(files, options, callback) {
 
                     }
 
-                }
+                ;}
 
                 if (sourceMapPath) {
 

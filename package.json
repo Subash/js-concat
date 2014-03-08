@@ -1,6 +1,6 @@
 {
   "name": "js-cat",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Concatenate Javascript Files With SourceMaps",
   "main": "index.js",
   "dependencies": {
@@ -16,10 +16,20 @@
     "concatenation",
     "concat"
   ],
-  "author": "https://twitter.com/sbspk",
+  "author": {
+    "name": "https://twitter.com/sbspk"
+  },
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/sbspk/js-cat/issues"
   },
-  "homepage": "https://github.com/sbspk/js-cat"
+  "homepage": "https://github.com/sbspk/js-cat",
+  "readme": "####Concatenate Javascript Files With Sourcemaps\n\n__Installation__\n\n```\nnpm install js-cat\n```\n\n__Usage__\n\n```javascript\n\njsCat = require('js-cat');\n\n//From Code\n\nvar files = [\n\t{code : '<Javascript Source Code>', map: '<optional><old sourcemap>', path: '<Path of File>'},\n\t{code : '<Javascript Source Code>', map: '<optional><old sourcemap>', path: '<Path of File>'}\n]\n\njsCat.concatSource(files, { mapFilePath : 'output.min.map' }, function(err, data) {\n\t\n\tif(err) return console.log(err);\n\t\n\tconsole.log(data.code, data.map);\n\n})\n\n//From Files List\n\njsCat.concatFiles(['test1.js', 'test2.js'], { mapFilePath : 'output.min.map' }, function(err, data) {\n\t\n\tif(err) return console.log(err);\n\t\n\tconsole.log(data.code, data.map);\n\n})\n\n```\n\n__License__\n\nMIT\n",
+  "readmeFilename": "readMe.md",
+  "_id": "js-cat@0.3.0",
+  "dist": {
+    "shasum": "f496cb07d7f9d20ba537bcfd1df14aeb998d61c6"
+  },
+  "_from": "js-cat@*",
+  "_resolved": "https://registry.npmjs.org/js-cat/-/js-cat-0.3.0.tgz"
 }
