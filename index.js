@@ -39,11 +39,11 @@ function _concatSource(files, options) {
 
             lines.forEach(function (line, k) {
 
-                var cols = line.split('').forEach(function(col, c) {
+                line.split('').forEach(function(col, c) {
 
                     var position = consumer.originalPositionFor({
                         line: k + 1,
-                        column: c + 1
+                        column: c
                     });
 
                     sourceMapNode.add(new SourceMapNode(position.line, position.column, position.source, col, position.name));
@@ -57,14 +57,10 @@ function _concatSource(files, options) {
 
             lines.forEach(function (line, k) {
 
-                var cols = line.split('').forEach(function(col, c) {
+                line.split('').forEach(function(col, c) {
 
-                    var position = consumer.originalPositionFor({
-                        line: k + 1,
-                        column: c + 1
-                    });
+                    sourceMapNode.add(new SourceMapNode(k + 1, c, filePath, col, null));
 
-                    sourceMapNode.add(new SourceMapNode(position.line, position.column, position.source, col, position.name));
                 });
 
             });
