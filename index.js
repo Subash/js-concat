@@ -74,7 +74,11 @@ function _concatSource(files, options) {
         sourceMapNode.add(';');
     });
 
-    sourceMapNode.add('//# sourceMappingURL=' + options.mapFilePath);
+    if(options.mapFilePath) {
+
+        sourceMapNode.add('//# sourceMappingURL=' + options.mapFilePath);
+
+    }
 
     var sourceCodeMap = sourceMapNode.toStringWithSourceMap();
 
