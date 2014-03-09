@@ -71,7 +71,7 @@ function _concatSource(files, options) {
 
         }
 
-        sourceMapNode.add(';\n');
+        sourceMapNode.add(';');
     });
 
     sourceMapNode.add('//# sourceMappingURL=' + options.mapFilePath);
@@ -160,7 +160,7 @@ function concatFiles(files, options, callback) {
 
                     }
 
-                ;}
+                };
 
                 if (sourceMapPath) {
 
