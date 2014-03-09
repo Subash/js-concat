@@ -39,6 +39,8 @@ function _concatSource(files, options) {
 
             lines.forEach(function (line, k) {
 
+                line = line.replace(/^(\/\/)[@#]\s+sourceMappingURL=[\w\.]+/, '');
+
                 line.split('').forEach(function(col, c) {
 
                     var position = consumer.originalPositionFor({
@@ -56,6 +58,8 @@ function _concatSource(files, options) {
 
 
             lines.forEach(function (line, k) {
+
+                line = line.replace(/^(\/\/)[@#]\s+sourceMappingURL=[\w\.]+/, '');
 
                 line.split('').forEach(function(col, c) {
 
