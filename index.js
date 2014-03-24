@@ -71,7 +71,12 @@ function _concatSource(files, options) {
 
         }
 
-        sourceMapNode.add(';');
+        if(file.code.trim().split('').reverse()[0] !== ';') {
+
+            sourceMapNode.add(';');
+
+        }
+
     });
 
     if(options.mapFilePath) {
