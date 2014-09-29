@@ -11,7 +11,7 @@ function _concatSource(files, options) {
 
     var sourceMapNode = new SourceMapNode();
 
-    files.forEach(function (file) {
+    files.forEach(function (file, index) {
 
         var src = file.code;
         var map = file.map;
@@ -39,7 +39,11 @@ function _concatSource(files, options) {
 
             lines.forEach(function (line, k) {
 
-                line = line.replace(/^(\/\/)[@#]\s+sourceMappingURL=[\w\.]+/, '');
+                if((/[@#]\s+sourceMappingURL=/gi).test(line)) {
+
+                    line = '';
+
+                }
 
                 line.split('').forEach(function(col, c) {
 
@@ -71,7 +75,7 @@ function _concatSource(files, options) {
 
         }
 
-        if(file.code.trim().split('').reverse()[0] !== ';') {
+        if(file.code.trim().split('').reverse()[0] !== ';' && index !== files.length - 1) {
 
             sourceMapNode.add(';');
 

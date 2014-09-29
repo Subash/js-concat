@@ -1,6 +1,6 @@
 {
   "name": "js-cat",
-  "version": "0.9.0",
+  "version": "0.10.0",
   "description": "Concatenate Javascript Files With SourceMaps",
   "main": "index.js",
   "dependencies": {
