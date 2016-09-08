@@ -1,35 +1,22 @@
 {
-  "name": "js-cat",
-  "version": "0.10.0",
-  "description": "Concatenate Javascript Files With SourceMaps",
-  "main": "index.js",
-  "dependencies": {
-    "source-map": "~0.1.33"
-  },
-  "devDependencies": {},
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/sbspk/js-cat"
-  },
-  "keywords": [
-    "javascript",
-    "concatenation",
-    "concat"
-  ],
-  "author": {
-    "name": "https://twitter.com/sbspk"
-  },
+  "name": "js-concat",
+  "version": "3.0.0",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/sbspk/js-cat/issues"
+  "main": "lib/index.js",
+  "scripts": {
+    "prepublish": "gulp prepublish"
   },
-  "homepage": "https://github.com/sbspk/js-cat",
-  "readme": "####Concatenate Javascript Files With Sourcemaps\n\n__Installation__\n\n```\nnpm install js-cat\n```\n\n__Usage__\n\n```javascript\n\njsCat = require('js-cat');\n\n//From Code\n\nvar files = [\n\t{code : '<Javascript Source Code>', map: '<optional><old sourcemap>', path: '<Path of File>'},\n\t{code : '<Javascript Source Code>', map: '<optional><old sourcemap>', path: '<Path of File>'}\n]\n\njsCat.concatSource(files, { mapFilePath : 'output.min.map' }, function(err, data) {\n\t\n\tif(err) return console.log(err);\n\t\n\tconsole.log(data.code, data.map);\n\n})\n\n//From Files List\n\njsCat.concatFiles(['test1.js', 'test2.js'], { mapFilePath : 'output.min.map' }, function(err, data) {\n\t\n\tif(err) return console.log(err);\n\t\n\tconsole.log(data.code, data.map);\n\n})\n\n```\n\n__License__\n\nMIT\n",
-  "readmeFilename": "readMe.md",
-  "_id": "js-cat@0.3.0",
-  "dist": {
-    "shasum": "f496cb07d7f9d20ba537bcfd1df14aeb998d61c6"
+  "devDependencies": {
+    "babel": "^6.5.2",
+    "babel-plugin-syntax-async-functions": "^6.8.0",
+    "babel-plugin-transform-async-to-generator": "^6.8.0",
+    "babel-plugin-transform-es2015-modules-commonjs": "^6.8.0",
+    "del": "^2.2.0",
+    "gulp": "^3.9.1",
+    "gulp-babel": "^6.1.2",
+    "gulp-sequence": "^0.4.5"
   },
-  "_from": "js-cat@*",
-  "_resolved": "https://registry.npmjs.org/js-cat/-/js-cat-0.3.0.tgz"
+  "dependencies": {
+    "bluebird": "^3.4.1"
+  }
 }
