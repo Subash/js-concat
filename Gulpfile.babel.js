@@ -14,4 +14,10 @@ gulp.task('compile-src', ['clean-lib'], ()=> {
     .pipe(gulp.dest('lib'));
 });
 
+gulp.task('watch', ['clean-lib'], ()=> {
+  return gulp.watch('src/**/*.js', ['compile-src']);
+});
+
+gulp.task('default', ['compile-src', 'watch']);
+
 gulp.task('prepublish', series('clean-lib', 'compile-src'));

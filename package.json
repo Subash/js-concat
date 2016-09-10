@@ -17,6 +17,7 @@
     "gulp-sequence": "^0.4.5"
   },
   "dependencies": {
+    "babel-plugin-transform-class-properties": "^6.11.5",
     "bluebird": "^3.4.1"
   }
 }
