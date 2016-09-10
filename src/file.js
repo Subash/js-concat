@@ -11,10 +11,11 @@ export default class File {
   static appendRegX = /@(?:prepros|codekit|)-append\s+(.*)/gi;
   static prependRegX = /@(?:prepros|codekit|)-prepend\s+(.*)/gi;
 
-  constructor(content, { filePath, parent }) {
+  constructor(content, { filePath, parent, sourcemap }) {
     this.prepends = [];
     this.appends = [];
     this.content = content;
+    this.sourcemap = sourcemap;
     this.filePath = path.normalize(filePath);
     this.fileDir = path.dirname(this.filePath);
     this.parent = parent;
@@ -67,9 +68,15 @@ export default class File {
 
   async createInclude(includePath, line) {
     try {
-      let data = await fs.readFileAsync(includePath);
-      data = data.toString();
-      const file = new File(data, { filePath: includePath, parent: this });
+      let content = await fs.readFileAsync(includePath);
+      let sourcemap;
+      try {
+        sourcemap = await fs.readFileAsync(includePath + '.map');
+        sourcemap.toString();
+      } catch (err) {}
+      const file = new File(content.toString(), {
+        filePath: includePath, parent: this, sourcemap
+      });
       return new Include({ line, file });
     } catch (err) {
       const error = Error('Unable to read included file.');
@@ -151,6 +158,6 @@ export default class File {
       appends = appends.concat(include.file.getIncludeList());
     }
     //Add self to the middle
-    return [...prepends, this.filePath, ...appends];
+    return [...prepends, this, ...appends];
   }
 }
