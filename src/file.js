@@ -80,7 +80,7 @@ export default class File {
       });
       return new Include({ line, file });
     } catch (err) {
-      const error = Error(`Unable to read included file. ${path.basename(includePath)}`);
+      const error = Error(`Unable to read included file ${path.basename(includePath)}`);
       error.filePath = this.filePath;
       error.line = line;
       err.originalError = err;
