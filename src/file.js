@@ -37,7 +37,7 @@ export default class File {
       const result = regx.exec(line);
       if (result) {
         let list = result[1];
-        list = list.replace(/\n|;|'|"/gi, ''); //Remove any new lines, semicolons or quotes or comments
+        list = list.replace(/;|'|"/gi, ''); //Remove any semicolons, quotes or comments
         list = list.split(','); //Split multiple imports with comma
         list = list.map(item => item.trim());
         list = list.filter(item => !!item);
