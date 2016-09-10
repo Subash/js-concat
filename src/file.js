@@ -35,6 +35,7 @@ export default class File {
 
     lines.forEach((line, index ) => {
       const result = regx.exec(line);
+      regx.lastIndex = 0; //Reset exec
       if (result) {
         let list = result[1];
         list = list.replace(/\n|;|'|"/gi, ''); //Remove any new lines, semicolons or quotes or comments

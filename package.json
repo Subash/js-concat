@@ -10,6 +10,7 @@
     "babel": "^6.5.2",
     "babel-plugin-syntax-async-functions": "^6.8.0",
     "babel-plugin-transform-async-to-generator": "^6.8.0",
+    "babel-plugin-transform-class-properties": "^6.11.5",
     "babel-plugin-transform-es2015-modules-commonjs": "^6.8.0",
     "del": "^2.2.0",
     "gulp": "^3.9.1",
@@ -17,7 +18,7 @@
     "gulp-sequence": "^0.4.5"
   },
   "dependencies": {
-    "babel-plugin-transform-class-properties": "^6.11.5",
-    "bluebird": "^3.4.1"
+    "bluebird": "^3.4.1",
+    "source-map": "^0.5.6"
   }
 }
