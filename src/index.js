@@ -1,6 +1,7 @@
 import { SourceMapConsumer, SourceNode } from 'source-map';
 import path from 'path';
-import File from './file';
+import _File from './file';
+export const File = _File;
 
 function parseSourcemap(mapString, filePath) {
   if(!mapString) return;
