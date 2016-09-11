@@ -8,8 +8,8 @@ const fs = bluebird.promisifyAll(_fs);
 
 export default class File {
 
-  static appendRegX = /@(?:prepros|codekit|)-append\s+(.*)/gi;
-  static prependRegX = /@(?:prepros|codekit|)-prepend\s+(.*)/gi;
+  static appendRegX = /@(?:prepros-|codekit-|)append\s+(.*)/gi;
+  static prependRegX = /@(?:prepros-|codekit-|)prepend\s+(.*)/gi;
 
   constructor(content, { filePath, parent, sourcemap }) {
     this.prepends = [];
