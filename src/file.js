@@ -107,7 +107,7 @@ export default class File {
       const fullPath = path.resolve(this.fileDir, includePath);
       let appendedPaths = [ fullPath ];
 
-      if(fullPath.indexOf('*')) {
+      if(fullPath.includes('*')) {
         appendedPaths = await this.resolveGlob(fullPath, line);
       }
 
