@@ -1,6 +1,6 @@
 {
   "name": "js-concat",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "license": "MIT",
   "main": "lib/index.js",
   "scripts": {
@@ -22,6 +22,7 @@
   },
   "dependencies": {
     "bluebird": "^3.4.1",
+    "glob": "^7.0.6",
     "source-map": "^0.5.6"
   }
 }
