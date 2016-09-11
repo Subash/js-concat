@@ -4,7 +4,8 @@
   "license": "MIT",
   "main": "lib/index.js",
   "scripts": {
-    "prepublish": "gulp prepublish"
+    "test": "mocha test/index.js",
+    "prepublish": "gulp prepublish && npm test"
   },
   "devDependencies": {
     "babel": "^6.5.2",
@@ -12,10 +13,12 @@
     "babel-plugin-transform-async-to-generator": "^6.8.0",
     "babel-plugin-transform-class-properties": "^6.11.5",
     "babel-plugin-transform-es2015-modules-commonjs": "^6.8.0",
+    "chai": "^3.5.0",
     "del": "^2.2.0",
     "gulp": "^3.9.1",
     "gulp-babel": "^6.1.2",
-    "gulp-sequence": "^0.4.5"
+    "gulp-sequence": "^0.4.5",
+    "mocha": "^3.0.2"
   },
   "dependencies": {
     "bluebird": "^3.4.1",
