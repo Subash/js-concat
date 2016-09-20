@@ -37,7 +37,7 @@ export function concatFiles(files) {
 
     lines.forEach((lineCode, index)=> {
       //Remove any old source mapping url refrences
-      lineCode = lineCode.replace(/^(\/\/)[@#]\s+sourceMappingURL=[\w.]+/, '');
+      if(lineCode.match(/[@#]\s+sourceMappingURL=/)) lineCode = '';
 
       //Add 1 in index for actual line number
       let lineNumber = index + 1;
