@@ -287,12 +287,12 @@ class Compiler {
 
     //Join prepend data, this data and the appends data
     const sources = [ ...prependData, { code: this.code, map: this.inputSourceMap, file: this.file }, ...appendData ];
-    if(!this.sourceMap) {
-      const code = this.joinSources(sources);
-      return { code, file: this.file };
-    } else {
+    if(this.sourceMap) {
       const result = await this.joinSourcesWithSourcemap(sources);
       return {...result, file: this.file };
+    } else {
+      const code = this.joinSources(sources);
+      return { code, file: this.file };
     }
   }
 }
