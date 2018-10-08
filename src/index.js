@@ -255,6 +255,9 @@ class Compiler {
           }
         }
 
+        //Make source path relative to the output dir
+        if(this.output) sourcePath = path.relative(this.output, sourcePath);
+
         //Add line contents
         sourceNode.add(new SourceNode( lineNumber, columnNumber, sourcePath, line ));
         //Add newline at the end of each line
@@ -266,7 +269,7 @@ class Compiler {
     }
     //Add the sourcemap url
     sourceNode.add(`//# sourceMappingURL=${path.basename(this.file)}.map`);
-    const result = sourceNode.toStringWithSourceMap({ file: this.output || this.file });
+    const result = sourceNode.toStringWithSourceMap();
     const code = result.code;
     const map = result.map.toString();
     return { code, map };
