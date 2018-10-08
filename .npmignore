@@ -1,5 +1,4 @@
-.git*
-.idea
-/src
-/test
-Gulpfile.babel.js
+.git
+coverage
+node_modules
+.editorconfig

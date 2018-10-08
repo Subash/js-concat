@@ -1,28 +1,50 @@
 {
   "name": "js-concat",
-  "version": "3.5.0",
+  "version": "4.0.0",
   "license": "MIT",
+  "description": "Concatenate js files with sourcemaps",
   "main": "lib/index.js",
   "scripts": {
-    "test": "mocha test/test.js",
-    "prepublish": "gulp prepublish && npm test"
+    "test": "npm run build && jest",
+    "build": "npm run clean-lib && npm run compile-src",
+    "compile-src": "babel src --out-dir lib",
+    "clean-lib": "rm -r ./lib || true",
+    "prepare": "npm run build && npm run test"
+  },
+  "jest": {
+    "modulePathIgnorePatterns": [
+      "fixtures"
+    ]
+  },
+  "babel": {
+    "plugins": [
+      "syntax-class-properties",
+      "syntax-object-rest-spread",
+      "transform-class-properties",
+      "transform-es2015-modules-commonjs",
+      "transform-object-rest-spread"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Subash/js-concat.git"
+  },
+  "author": "Subash Pathak",
+  "bugs": {
+    "url": "https://github.com/Subash/js-concat/issues"
+  },
+  "homepage": "https://github.com/Subash/js-concat#readme",
+  "dependencies": {
+    "fs-extra": "^7.0.0",
+    "source-map": "^0.7.3"
   },
   "devDependencies": {
-    "babel": "^6.5.2",
-    "babel-plugin-syntax-async-functions": "^6.8.0",
-    "babel-plugin-transform-async-to-generator": "^6.8.0",
-    "babel-plugin-transform-class-properties": "^6.11.5",
-    "babel-plugin-transform-es2015-modules-commonjs": "^6.8.0",
-    "chai": "^3.5.0",
-    "del": "^2.2.0",
-    "gulp": "^3.9.1",
-    "gulp-babel": "^6.1.2",
-    "gulp-sequence": "^0.4.5",
-    "mocha": "^3.0.2"
-  },
-  "dependencies": {
-    "bluebird": "^3.4.1",
-    "glob": "^7.0.6",
-    "source-map": "^0.5.6"
+    "babel-cli": "^6.26.0",
+    "babel-plugin-syntax-class-properties": "^6.13.0",
+    "babel-plugin-syntax-object-rest-spread": "^6.13.0",
+    "babel-plugin-transform-class-properties": "^6.24.1",
+    "babel-plugin-transform-es2015-modules-commonjs": "^6.26.2",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
+    "jest": "^23.6.0"
   }
 }
