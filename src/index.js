@@ -17,7 +17,7 @@ class Compiler {
     this.inputSourceMap = options.inputSourceMap || '';
     this.sourceMap = options.sourceMap;
     this.file = options.file || '';
-    this.output = options.output || '';
+    this.outputDir = options.outputDir || '';
     this.baseDir = path.dirname(this.file);
     this.rootDir = options.rootDir || this.baseDir;
     this.parents = options.parents || [];
@@ -262,7 +262,7 @@ class Compiler {
         }
 
         //Make source path relative to the output dir
-        if(this.output) sourcePath = path.relative(this.output, sourcePath);
+        if(this.outputDir) sourcePath = path.relative(outputDir, sourcePath);
 
         //Add line contents
         sourceNode.add(new SourceNode( lineNumber, columnNumber, sourcePath, line ));
