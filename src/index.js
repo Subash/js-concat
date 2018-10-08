@@ -3,6 +3,7 @@ import path from 'path';
 import fs from 'fs-extra';
 import _glob from 'glob';
 import { promisify } from 'util';
+import url from 'url';
 const glob = promisify(_glob);
 
 class Compiler {
@@ -212,8 +213,13 @@ class Compiler {
 
     //Provide the full source paths
     map.file = file;
-    map.sources = map.sources.map((source) => path.resolve(path.dirname(file), source));
-    delete map.sourceRoot;
+    let sourceRoot;
+    if(map.sourceRoot) {
+      sourceRoot = url.parse(map.sourceRoot).pathname;
+      delete map.sourceRoot;
+    }
+    sourceRoot = sourceRoot || path.dirname(file);
+    map.sources = map.sources.map((source) => path.resolve(sourceRoot, source));
     return await new SourceMapConsumer(map);
   }
 
