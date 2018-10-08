@@ -262,7 +262,7 @@ class Compiler {
         }
 
         //Make source path relative to the output dir
-        if(this.outputDir) sourcePath = path.relative(outputDir, sourcePath);
+        if(this.outputDir) sourcePath = path.relative(this.outputDir, sourcePath);
 
         //Add line contents
         sourceNode.add(new SourceNode( lineNumber, columnNumber, sourcePath, line ));
