@@ -103,7 +103,8 @@ class Compiler {
   async resolveGlobInclude(include) {
     try {
       let files = await glob(include.file, { cwd: this.baseDir });
-      return files.map( file=> path.resolve(this.baseDir, file));
+      files = files.filter( file=> Compiler.extensions.includes(path.extname(file))); //Only resolve supported files
+      return files.map( file=> path.resolve(this.baseDir, file)); //Resolve full paths
     } catch (e) {
       const err = new Error(`Unable to resolve the glob pattern \`${include.file}\``);
       err.file = this.file;
