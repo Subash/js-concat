@@ -18,7 +18,7 @@ class Compiler {
     this.sourceMap = options.sourceMap;
     this.file = options.file || '';
     this.outputDir = options.outputDir || '';
-    this.baseDir = path.dirname(this.file);
+    this.baseDir = options.baseDir || path.dirname(this.file);
     this.rootDir = options.rootDir || this.baseDir;
     this.parents = options.parents || [];
   }
