@@ -46,6 +46,20 @@ test('Test invalid include', async ()=> {
   );
 });
 
+test('Test error line and file', async ()=> {
+  const file = path.resolve(fixtures, 'input/test.js');
+  const output = path.resolve(fixtures, 'output/test.js');
+  try {
+    await compile(`\n\n\n\n//@append test/bogus.js`, { file, output, sourceMap: true });
+    await expect(true).toBe(false);
+  } catch(err) {
+    expect(err.message).toBe('Unable to find the included file `test/bogus.js`');
+    expect(err.file).toBe(file);
+    expect(err.column).toBe(1);
+    expect(err.line).toBe(5);
+  }
+});
+
 test('Test parent import', async ()=> {
   const file = path.resolve(fixtures, 'input/test.js');
   const output = path.resolve(fixtures, 'output/test.js');

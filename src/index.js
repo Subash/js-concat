@@ -32,7 +32,7 @@ class JSConcat {
 
   getMatchingFiles(regx) {
     let files = [];
-    for(const [line, code] of this.code.split('\n').entries()) {
+    for(const [index, code] of this.code.split('\n').entries()) {
       if(regx.test(code)) {
         files = files.concat(
           code
@@ -40,7 +40,7 @@ class JSConcat {
             .replace(/;|'|"/gi, '') //Remove any semicolons or quotes
             .split(',') //Split comma separated lists
             .filter(file=> !!file) //Remove empty items
-            .map(file=> ({ file: file.trim(), line }))
+            .map(file=> ({ file: file.trim(), line: index + 1 }))
         );
       }
     }
