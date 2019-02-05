@@ -10,7 +10,7 @@ test('Test compile with sourcemap', async ()=> {
   const result = await compile(data, { file, output, sourceMap: true });
   expect(result.code).toBe(fs.readFileSync(output, 'utf-8'));
   expect(JSON.parse(result.map.toString()).mappings).toBe(JSON.parse(fs.readFileSync(`${output}.map`, 'utf-8')).mappings);
-});
+}
 
 
 test('Test compile without sourcemap', async ()=> {
