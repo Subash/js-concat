@@ -1,28 +1,15 @@
 {
   "name": "js-concat",
-  "version": "4.0.5",
+  "version": "4.1.0",
   "license": "MIT",
   "description": "Concatenate js files with sourcemaps",
-  "main": "lib/index.js",
+  "main": "src/index.js",
   "scripts": {
-    "test": "npm run build && jest",
-    "build": "npm run clean-lib && npm run compile-src",
-    "compile-src": "babel src --out-dir lib",
-    "clean-lib": "rm -r ./lib || true",
-    "prepare": "npm run build && npm run test"
+    "test": "jest"
   },
   "jest": {
-    "modulePathIgnorePatterns": [
+    "testPathIgnorePatterns": [
       "fixtures"
-    ]
-  },
-  "babel": {
-    "plugins": [
-      "syntax-class-properties",
-      "syntax-object-rest-spread",
-      "transform-class-properties",
-      "transform-es2015-modules-commonjs",
-      "transform-object-rest-spread"
     ]
   },
   "repository": {
@@ -35,16 +22,9 @@
   },
   "homepage": "https://github.com/Subash/js-concat#readme",
   "dependencies": {
-    "fs-extra": "^7.0.0",
     "source-map": "^0.7.3"
   },
   "devDependencies": {
-    "babel-cli": "^6.26.0",
-    "babel-plugin-syntax-class-properties": "^6.13.0",
-    "babel-plugin-syntax-object-rest-spread": "^6.13.0",
-    "babel-plugin-transform-class-properties": "^6.24.1",
-    "babel-plugin-transform-es2015-modules-commonjs": "^6.26.2",
-    "babel-plugin-transform-object-rest-spread": "^6.26.0",
-    "jest": "^23.6.0"
+    "jest": "^24.0.0"
   }
 }

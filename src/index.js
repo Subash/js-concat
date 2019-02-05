@@ -1,309 +1,172 @@
-import { SourceMapConsumer, SourceNode } from 'source-map';
-import path from 'path';
-import fs from 'fs-extra';
-import _glob from 'glob';
-import { promisify } from 'util';
-import url from 'url';
-const glob = promisify(_glob);
+const { SourceMapConsumer, SourceNode } = require('source-map');
+const path = require('path');
+const { promisify } = require('util');
+const fs = require('fs');
+const glob = promisify(require('glob'));
+const REGX_APPEND = /\/\/(\s+|)@(prepros-|codekit-|)append/;
+const REGX_PREPEND = /\/\/(\s+|)@(prepros-|codekit-|)prepend/;
+const REGX_SOURCEMAP = /\/\/(\s+|)[@#](\s+|)sourceMappingURL=/;
 
-class Compiler {
-  static REGX_APPEND = /\/\/(\s+|)@(prepros-|codekit-|)append/;
-  static REGX_PREPEND = /\/\/(\s+|)@(prepros-|codekit-|)prepend/;
-  static REGX_SOURCEMAP = /\/\/(\s+|)[@#](\s+|)sourceMappingURL=/;
-  static extensions = [ '.js' ];
-
+class JSConcat {
   constructor(options) {
+    this.file = options.file || this.throwError('`file` is required');
+    this.output = options.output || this.throwError('`output` is required');
     this.code = options.code || '';
-    this.inputSourceMap = options.inputSourceMap || '';
     this.sourceMap = options.sourceMap;
-    this.file = options.file || '';
-    this.outputDir = options.outputDir || '';
+    this.inputSourceMap = options.inputSourceMap;
     this.baseDir = options.baseDir || path.dirname(this.file);
     this.rootDir = options.rootDir || this.baseDir;
     this.parents = options.parents || [];
   }
 
-  matchIncludes({ data, regx }) {
-    const lines = data.split('\n');
+  throwError(message) {
+    throw new Error(message);
+  }
+
+  async exists(file) {
+    const access = promisify(fs.access.bind(fs));
+    return await access(file, fs.constants.F_OK)
+      .then(()=> true)
+      .catch(()=> false);
+  }
+
+  getMatchingFiles(regx) {
     let files = [];
-    for(let [ index, line ] of lines.entries()) {
-      if(!regx.test(line)) continue;
-      let list = line.replace(regx, ''); //Remove the comment part
-      list = list.replace(/;|'|"/gi, ''); //Remove any semicolons or quotes
-      list = list.split(','); //Split comma separated lists
-      list = list.map(item => item.trim());
-      list = list.filter(item => !!item);
-      files.push(...list.map( item => {
-        return { file: item, line: index + 1};
-      }));
+    for(const [line, code] of this.code.split('\n').entries()) {
+      if(regx.test(code)) {
+        files = files.concat(
+          code
+            .replace(regx, '') //Remove the @append/@prepend part
+            .replace(/;|'|"/gi, '') //Remove any semicolons or quotes
+            .split(',') //Split comma separated lists
+            .filter(file=> !!file) //Remove empty items
+            .map(file=> ({ file: file.trim(), line }))
+        );
+      }
     }
     return files;
   }
 
-  matchPrepends(data) {
-    return this.matchIncludes({ data: data, regx: Compiler.REGX_PREPEND });
+  async resolveGlob(pattern) {
+    let files = await glob(pattern, { cwd: this.baseDir, absolute: true });
+    files = files.filter(file=> path.extname(file) === '.js'); //Only resolve js files
+    if(!files.length) throw new Error(`Unable to find any files matching the pattern \`${pattern}\``);
+    return files;
   }
 
-  matchAppends(data) {
-    return this.matchIncludes({ data: data, regx: Compiler.REGX_APPEND });
+  async _resolveFile(file) {
+    if(file.includes('*')) return await this.resolveGlob(file);
+    const name = path.basename(file, '.js');
+    const possibleNames = [`${name}.js`, `_${name}.js`]; //file.js or _file.js partial
+    for(const name of possibleNames) {
+      const filePath = path.resolve(this.baseDir, path.dirname(file), name);
+      if(await this.exists(filePath)) return filePath;
+    }
+    throw new Error(`Unable to find the included file \`${file}\``);
   }
 
-  getPossiblePaths(include) {
-    const file = path.resolve(this.baseDir, include.file);
-    const dir = path.dirname(file);
-    const name = path.basename(file);
-  
-    //Possible names can be file name or partial
-    let names = [ name, `_${name}`];
-  
-    //Add possible extensions
-    let files = [];
-    for(const name of names) {
-      files.push(name);
-      for(const extension of Compiler.extensions) {
-        files.push(`${name}${extension}`);
-      }
-    }
-
-    //Return full paths
-    return files.map( file => path.join(dir, file));
-  }
-
-  async resolveInclude(include) {
-    const possiblePaths = this.getPossiblePaths(include);
-    let file;
-
-    for(const possiblePath of possiblePaths) {
-      try {
-        await fs.access( possiblePath, fs.constants.F_OK);
-        file = possiblePath;
-        break;
-      } catch (err) {}
-    }
-
-    if(!file) {
-      let err = new Error(`Failed to find the included file \`${include.file}\``);
-      err.file = this.file;
-      err.line = include.line;
-      err.column = 1;
-      throw err;
-    }
-
-    if(this.parents.includes(file)) {
-      let err = Error(`Recursive include detected. \`${path.relative(this.rootDir, this.file)}\` is including parent file ${path.relative(this.rootDir, file)}`);
-      err.file = this.file;
-      err.line = include.line;
-      err.column = 1;
-      throw err;
-    }
-  
-    return file;
-  }
-
-  async resolveGlobInclude(include) {
+  //Resolve real path of an included file
+  //Can be multiple in case of a glob
+  async resolveFile({ file, line }) {
+    let files;
     try {
-      let files = await glob(include.file, { cwd: this.baseDir });
-      files = files.filter( file=> Compiler.extensions.includes(path.extname(file))); //Only resolve supported files
-      return files.map( file=> path.resolve(this.baseDir, file)); //Resolve full paths
-    } catch (e) {
-      const err = new Error(`Unable to resolve the glob pattern \`${include.file}\``);
-      err.file = this.file;
-      err.line = include.line;
+      files = [].concat(await this._resolveFile(file));
+
+      //Throw an error if a file is including itself
+      files.forEach(file=> {
+        if(file === this.file) throw new Error(`\`${path.relative(this.rootDir, file)}\` can not be appended/prepended to itself`);
+      });
+
+      //Throw an error if a file is including a parent
+      files.forEach(file=> {
+        if(this.parents.includes(file)) throw new Error(`\`${path.relative(this.rootDir, this.file)}\` can not append/prepend the parent file \`${path.relative(this.rootDir, file)}\``);
+      });
+    } catch (err) {
+      err.line = line;
       err.column = 1;
-      err.originalError = e;
+      err.file = this.file;
       throw err;
     }
+
+    return files;
   }
 
-  async resolveIncludes(includes) {
-    const result = [];
-    for(const include of includes) {
-      //Resolve globs
-      if(include.file.includes('*')) {
-        let files = await this.resolveGlobInclude(include);
-        files = files.map( file => {
-          return { file, line: include.line }
+  //Resolve and recursively compile each included file
+  async getIncludes(regx) {
+    let result = [];
+    const files = this.getMatchingFiles(regx);
+    for(const { file, line } of files) {
+      for(const filePath of await this.resolveFile({ file, line })) {
+        const { code, map } = await JSConcat.compileFile(filePath, {
+          output: this.output,
+          sourceMap: this.sourceMap,
+          rootDir: this.rootDir,
+          parents: this.parents.concat(this.file)
         });
-        result.push(...files);
-      } else {
-        const file = await this.resolveInclude(include);
-        result.push({ file, line: include.line });
+        result = result.concat({ code, map, file: filePath });
       }
     }
     return result;
   }
 
-  async readFile(file) {
-    const code = await fs.readFile(file, 'utf-8');
-    let map;
-    if(this.sourceMap) {
-      try {
-        map = await fs.readFile(`${file}.map`, 'utf-8'); //Read the map file if that exists next to the file
-      } catch (err) {}
-    }
-    return { code, map, file };
+  async compile() {
+    let sources = [
+      ...await this.getIncludes(REGX_PREPEND),
+      { file: this.file, code: this.code, map: this.inputSourceMap },
+      ...await this.getIncludes(REGX_APPEND)
+    ];
+
+    return await this.joinSources(sources);
   }
 
-  async readAndCompile(file) {
-    let code, map;
-  
-    try {
-      const result= await this.readFile(file);
-      code = result.code;
-      map = result.map;
-    } catch (e) {
-      const err = new Error(`Failed to read the included file ${path.relative(this.rootDir, file)}`);
-      err.originalError = e;
-      throw err;
-    }
-
-    const compiler = new Compiler({
-      file,
-      code,
-      inputSourceMap: map,
-      sourceMap: this.sourceMap,
-      rootDir: this.rootDir,
-      parents: [...this.parents, this.file]
-    });
-
-    return await compiler.compile();
-  }
-
-  async readAndCompileInclude(include) {
-    try {
-      return this.readAndCompile(include.file);
-    } catch (e) {
-      const err = new Error(e.message);
-      err.file = e.file || this.file;
-      err.line = e.line || include.line;
-      err.column = e.column || 1;
-      err.originalError = e;
-      throw err;
-    }
-  }
-
-  async readAndCompileIncludes(includes) {
-    return Promise.all( includes.map( include => this.readAndCompileInclude(include)));
-  }
-  
-  /**
-   * Join sources without sourcemaps
-   */
-  joinSources(sources) {
-    const result = [];
-    for(const { code } of sources) {
-      const lines = code.split('\n');
-      for(const line of lines) {
-        const specialRegx = [ Compiler.REGX_APPEND, Compiler.REGX_PREPEND, Compiler.REGX_SOURCEMAP ];
-        const hasSpecialComment = specialRegx.some( regx => regx.test(line));
-        if(!hasSpecialComment) result.push(line);
+  async getOriginalPosition({ source, map, line, lineContent }) {
+    return await SourceMapConsumer.with(map, null, map=> {
+      //Iterate over line content until a source is found
+      for(const [, column] of lineContent.split('').entries()) {
+        const position = map.originalPositionFor({ line, column });
+        if(!position.source) continue;
+        position.source = path.resolve(path.dirname(source), position.source); //Make source absolute
+        return position;
       }
-    }
-    return result.join('\n');
+      return { source, line, column: 1 };
+    });
   }
 
-  async parseSourceMap(map, file) {
-    if(!map) return;
-    try {
-      map = JSON.parse(map);
-    } catch (e) {
-      const err = new Error(`Failed to read the sourcemap file. ${path.relative(this.rootDir, file)}`);
-      err.originalError = e;
-      throw err;
-    }
-
-    //Provide the full source paths
-    map.file = file;
-    let sourceRoot;
-    if(map.sourceRoot) {
-      sourceRoot = url.parse(map.sourceRoot).pathname;
-      delete map.sourceRoot;
-    }
-    sourceRoot = sourceRoot || path.dirname(file);
-    map.sources = map.sources.map((source) => path.resolve(sourceRoot, source));
-    return await new SourceMapConsumer(map);
-  }
-
-  getOriginalPositionForLine({ line, map, lineNumber }) {
-    //loop each character in the line to find the original position
-    for(const [ index, column ] of line.split('').entries()) {
-      const originalPosition = map.originalPositionFor({
-        line: lineNumber, column: index
-      });
-      if(originalPosition.source) return originalPosition;
-    }
-  }
-
-  /**
-   * Join sources with sourcemaps
-   */
-  async joinSourcesWithSourcemap(sources) {
-    const sourceNode = new SourceNode();
+  async joinSources(sources) {
+    const result = new SourceNode();
     for(const source of sources) {
-      const code = source.code;
-      const map = await this.parseSourceMap(source.map, source.file);
-      const lines = code.split('\n');
-      for(const [index, line]of lines.entries()) {
-        const specialRegx = [ Compiler.REGX_APPEND, Compiler.REGX_PREPEND, Compiler.REGX_SOURCEMAP ];
-        const hasSpecialComment = specialRegx.some( regx => regx.test(line));
+      const lines = source.code.split('\n');
+      for(const [index, data] of lines.entries()) {
+        const specialRegx = [ REGX_APPEND, REGX_PREPEND, REGX_SOURCEMAP ]; //Remove append, prepend and sourcemap statements
+        const hasSpecialComment = specialRegx.some( regx => regx.test(data));
         if(hasSpecialComment) continue;
 
-        let lineNumber = index + 1;
-        let columnNumber = 1;
-        let sourcePath = source.file;
+        //Source Position
+        let position = { line: index + 1, column: 1, source: source.file };
 
-        //Find the line and column in original sourcemap if that exists
-        if(map) {
-          const originalPosition = this.getOriginalPositionForLine({ line, map, lineNumber });
-          if(originalPosition) {
-            lineNumber = originalPosition.line;
-            columnNumber = originalPosition.column;
-            sourcePath = originalPosition.source;
-          }
+        //Get original source position
+        if(this.sourceMap && source.map) {
+          position = await this.getOriginalPosition({ map: source.map, source: position.source, line: position.line, lineContent: data });
         }
 
-        //Make source path relative to the output dir
-        if(this.outputDir) sourcePath = path.relative(this.outputDir, sourcePath);
-
         //Add line contents
-        sourceNode.add(new SourceNode( lineNumber, columnNumber, sourcePath, line ));
-        //Add newline at the end of each line
-        sourceNode.add('\n');
+        result.add(new SourceNode( position.line, position.column, position.source, data + '\n' ));
       }
-
-      //Sourcemap must be destroyed after use
-      if(map) map.destroy();
     }
-    //Add the sourcemap url
-    sourceNode.add(`//# sourceMappingURL=${path.basename(this.file)}.map`);
-    const result = sourceNode.toStringWithSourceMap();
-    const code = result.code;
-    const map = result.map.toString();
-    return { code, map };
+
+    if(this.sourceMap) result.add(`//# sourceMappingURL=${path.basename(this.output)}.map`);
+    let { code, map } = result.toStringWithSourceMap();
+    return { code, map: this.sourceMap? map.toString(): null };
   }
 
-  async compile() {
-    let appends = this.matchAppends(this.code);
-    let prepends = this.matchPrepends(this.code);
-
-    let resolvedAppends = await this.resolveIncludes(appends);
-    let resolvedPrepends = await this.resolveIncludes(prepends);
-
-    let appendData = await this.readAndCompileIncludes(resolvedAppends);
-    let prependData = await this.readAndCompileIncludes(resolvedPrepends);
-
-    //Join prepend data, this data and the appends data
-    const sources = [ ...prependData, { code: this.code, map: this.inputSourceMap, file: this.file }, ...appendData ];
-    if(this.sourceMap) {
-      const result = await this.joinSourcesWithSourcemap(sources);
-      return {...result, file: this.file };
-    } else {
-      const code = this.joinSources(sources);
-      return { code, file: this.file };
-    }
+  static async compileFile(file, options) {
+    const readFile = promisify(fs.readFile.bind(fs));
+    const code = await readFile(file, 'utf-8');
+    const inputSourceMap = await readFile(`${file}.map`, 'utf-8').catch(()=>null); //Read only if exists
+    return await new JSConcat({ ...options, code, file, inputSourceMap }).compile();
   }
 }
 
-export default async function compile(code, options = {}) {
-  return await new Compiler({ code, ...options }).compile();
+module.exports = async function compile(code, options = {}) {
+  return await new JSConcat({ code, ...options }).compile();
 }
