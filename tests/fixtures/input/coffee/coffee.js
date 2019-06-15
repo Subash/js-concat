@@ -1,5 +1,5 @@
 (function() {
-  console.log('coffee');
+  console.log('coffee line 1');
 
   console.log('coffee line 3');
 

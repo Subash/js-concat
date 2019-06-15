@@ -1,1 +1,1 @@
-console.log('glob-b');
+console.log('glob-b line 1');

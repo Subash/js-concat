@@ -12,7 +12,6 @@ test('Test compile with sourcemap', async ()=> {
   expect(JSON.parse(result.map.toString()).mappings).toBe(JSON.parse(fs.readFileSync(`${output}.map`, 'utf-8')).mappings);
 });
 
-
 test('Test compile without sourcemap', async ()=> {
   const file = path.resolve(fixtures, 'input/test.js');
   const output = path.resolve(fixtures, 'output/test-no-map.js');
@@ -20,7 +19,6 @@ test('Test compile without sourcemap', async ()=> {
   const result = await compile(data, { file, output, sourceMap: false });
   expect(result.code).toBe(fs.readFileSync(output, 'utf-8'));
 });
-
 
 test('Test infinite loop', async ()=> {
   const file = path.resolve(fixtures, 'input/test.js');
@@ -61,15 +59,19 @@ test('Test error line and file', async ()=> {
 });
 
 test('Test parent import', async ()=> {
-  const file = path.resolve(fixtures, 'input/test.js');
-  const output = path.resolve(fixtures, 'output/test.js');
-  await expect(compile(`//@append test-b.js`, { file, output, sourceMap: true, parents: [path.resolve(fixtures, 'input/test-b.js')]})).rejects.toEqual(
-    new Error('`test.js` can not append/prepend the parent file `test-b.js`')
-  );
+  const file = path.resolve(fixtures, 'input/parent-import.js');
+  const output = path.resolve(fixtures, 'output/parent-import.js');
+  expect.assertions(2);
+  try {
+    await compile(fs.readFileSync(file, 'utf-8'), { file, output });
+  } catch (err) {
+    expect(err.message).toBe('`parent-importer.js` can not append/prepend the parent file `parent-import.js`');
+    expect(err.line).toBe(5);
+  }
 });
 
 test('Test no `file` option', async ()=> {
-  await expect(compile('')).rejects.toEqual(
+  await expect(compile('', { output: 'abc.js' })).rejects.toEqual(
     new Error('`file` is required')
   );
 });
@@ -81,7 +83,22 @@ test('Test no `output` option', async ()=> {
 });
 
 test('Test no `code` option', async ()=> {
-  const { map, code } = await compile(null, { file: 'abc.js', output: 'def.js'});
+  await expect(compile(null, { file: 'abc.js', output: 'def.js' })).rejects.toEqual(
+    new Error('`code` must be a string')
+  );
+});
+
+test('Test empty `code` option', async ()=> {
+  const { map, code } = await compile('', { file: 'abc.js', output: 'def.js' });
   expect(code).toBeDefined();
   expect(map).toBe(null);
+});
+
+test('Test no options', async ()=> {
+  expect.assertions(1);
+  try {
+    await compile('');
+  } catch (err) {
+    expect(err).toBeTruthy();
+  }
 });

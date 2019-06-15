@@ -3,4 +3,4 @@
 //@prepros-prepend "glob/*"
 //@prepros-append coffee/coffee.js
 
-console.log('test');
+console.log('test.js line 6');

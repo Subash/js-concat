@@ -1,4 +1,11 @@
-console.log('test-b');
+
+
+
+
+
+
+
+console.log('test-b line 8');
 
 
 
@@ -7,24 +14,22 @@ console.log('test-b');
 
 
 
+console.log('glob-a line 7');
 
-console.log('glob-a');
-
-
-console.log('glob-b');
+console.log('glob-b line 1');
 
 
+console.log('test.js line 6');
 
-console.log('test');
 
-console.log('test-a');
 
+
+console.log('test-a line 4');
 
 (function() {
-  console.log('coffee');
+  console.log('coffee line 1');
 
   console.log('coffee line 3');
 
 }).call(this);
-
 

@@ -4,4 +4,4 @@
 
 
 
-console.log('glob-a');
+console.log('glob-a line 7');
