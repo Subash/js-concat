@@ -8,6 +8,8 @@ test('Test compile with sourcemap', async ()=> {
   const output = path.resolve(fixtures, 'output/test.js');
   const data = fs.readFileSync(file, 'utf-8');
   const result = await compile(data, { file, output, sourceMap: true });
+  // fs.writeFileSync(output, result.code);
+  // fs.writeFileSync(output + '.map', result.map);
   expect(result.code).toBe(fs.readFileSync(output, 'utf-8'));
   expect(JSON.parse(result.map.toString()).mappings).toBe(JSON.parse(fs.readFileSync(`${output}.map`, 'utf-8')).mappings);
 });
@@ -17,6 +19,7 @@ test('Test compile without sourcemap', async ()=> {
   const output = path.resolve(fixtures, 'output/test-no-map.js');
   const data = fs.readFileSync(file, 'utf-8');
   const result = await compile(data, { file, output, sourceMap: false });
+  // fs.writeFileSync(output, result.code);
   expect(result.code).toBe(fs.readFileSync(output, 'utf-8'));
 });
 
@@ -25,14 +28,6 @@ test('Test infinite loop', async ()=> {
   const output = path.resolve(fixtures, 'output/test.js');
   await expect(compile(`//@append test.js`, { file, output, sourceMap: true })).rejects.toEqual(
     new Error('`test.js` can not be appended/prepended to itself')
-  );
-});
-
-test('Test invalid glob pattern', async ()=> {
-  const file = path.resolve(fixtures, 'input/test.js');
-  const output = path.resolve(fixtures, 'output/test.js');
-  await expect(compile(`//@append test/bogus/*.js`, { file, output, sourceMap: true })).rejects.toEqual(
-    new Error('Unable to find any files matching the pattern `test/bogus/*.js`')
   );
 });
 
