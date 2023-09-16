@@ -15,4 +15,5 @@ jobs:
       - name: test
         run: |
           npm install
+          npm run prepack
           npm run test
