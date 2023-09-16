@@ -36,7 +36,7 @@ async function getSources({ file, code, map, readMap, rootDir, parents }) {
   return sources;
 }
 
-export default async function compile(code, options = {}) {
+export default async function concat(code, options = {}) {
   const file = options.file;
   const map = options.inputSourceMap;
   const sourceMap = options.sourceMap || false;

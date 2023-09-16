@@ -12,7 +12,7 @@ declare module "js-concat" {
     map?: string;
   }
 
-  export default function compile(
+  export default function concat(
     code: string,
     options: ConcatOptions
   ): Promise<ConcatResult>;
