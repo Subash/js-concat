@@ -1,6 +1,6 @@
-const compile = require('..');
-const fs = require('fs');
-const path = require('path');
+const compile = require('../lib').default;
+const fs = require('node:fs');
+const path = require('node:path');
 const fixtures = path.resolve(__dirname, 'fixtures');
 
 test('Test compile with sourcemap', async ()=> {

@@ -1,10 +1,9 @@
-const path = require('node:path');
-const { SourceMapConsumer, SourceNode } = require('source-map');
+import { SourceMapConsumer, SourceNode } from 'source-map';
+import path from 'node:path';
 
 const REGX_APPEND = /\/\/(\s+|)@(prepros-|codekit-|)append/;
 const REGX_PREPEND = /\/\/(\s+|)@(prepros-|codekit-|)prepend/;
 const REGX_SOURCEMAP = /\/\/(\s+|)[@#](\s+|)sourceMappingURL=/;
-
 
 /**
  * Replaces all backslashes with forward slashes in a given path.
@@ -88,7 +87,7 @@ async function joinWithSourceMap(sources, output) {
   return result.toStringWithSourceMap();
 }
 
-module.exports = async function joinSources(sources, { output, sourceMap }) {
+export default async function joinSources(sources, { output, sourceMap }) {
   if(sourceMap) return await joinWithSourceMap(sources, output);
   return { code: await joinWithoutSourceMap(sources), map: null };
 }

@@ -2,10 +2,16 @@
   "name": "js-concat",
   "version": "5.1.2",
   "license": "MIT",
-  "description": "Concatenate js files with sourcemaps",
+  "description": "Concatenate js files with sourcemaps.",
   "main": "src/index.js",
+  "types": "index.d.ts",
   "scripts": {
-    "test": "jest"
+    "clean-lib": "rimraf lib",
+    "clean": "npm run clean-lib",
+    "compile-src": "esbuild src/index.js --outfile=lib/index.js --bundle --platform=node --packages=external --target=node18",
+    "prepack": "npm run clean && npm run compile-src",
+    "test": "jest",
+    "watch": "npm run compile-src -- --watch --sourcemap=inline"
   },
   "jest": {
     "testPathIgnorePatterns": [
@@ -25,6 +31,8 @@
     "source-map": "^0.7.4"
   },
   "devDependencies": {
-    "jest": "^29.7.0"
+    "esbuild": "^0.19.3",
+    "jest": "^29.7.0",
+    "rimraf": "^5.0.1"
   }
 }

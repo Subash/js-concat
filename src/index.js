@@ -1,6 +1,6 @@
-const { readFile } = require('node:fs/promises');
-const Resolver = require('./resolver');
-const joinSources = require('./join-sources');
+import { readFile } from 'node:fs/promises';
+import Resolver from './resolver';
+import joinSources from './join-sources';
 
 async function readCodeMap(file, readMap) {
   const code = await readFile(file, 'utf-8');
@@ -36,7 +36,7 @@ async function getSources({ file, code, map, readMap, rootDir, parents }) {
   return sources;
 }
 
-module.exports = async function compile(code, options = {}) {
+export default async function compile(code, options = {}) {
   const file = options.file;
   const map = options.inputSourceMap;
   const sourceMap = options.sourceMap || false;

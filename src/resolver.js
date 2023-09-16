@@ -1,10 +1,10 @@
-const path = require('node:path');
-const fs = require('node:fs/promises');
+import path from 'node:path';
+import fs from 'node:fs/promises';
 
 const REGX_APPEND = /\/\/(\s+|)@(prepros-|codekit-|)append/;
 const REGX_PREPEND = /\/\/(\s+|)@(prepros-|codekit-|)prepend/;
 
-module.exports = class Resolver {
+export default class Resolver {
   constructor(options) {
     this.file = options.file;
     this.code = options.code;
