@@ -1,5 +1,2 @@
-.git
-.editorconfig
 /coverage
-/node_modules
 /tests

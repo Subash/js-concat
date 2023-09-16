@@ -1,6 +1,6 @@
-const path = require('path');
-const { promisify } = require('util');
-const fs = require('fs');
+const path = require('node:path');
+const fs = require('node:fs/promises');
+
 const REGX_APPEND = /\/\/(\s+|)@(prepros-|codekit-|)append/;
 const REGX_PREPEND = /\/\/(\s+|)@(prepros-|codekit-|)prepend/;
 
@@ -14,8 +14,7 @@ module.exports = class Resolver {
   }
 
   async exists(file) {
-    const access = promisify(fs.access.bind(fs));
-    return await access(file, fs.constants.F_OK)
+    return await fs.access(file, fs.constants.F_OK)
       .then(()=> true)
       .catch(()=> false);
   }

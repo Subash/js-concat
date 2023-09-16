@@ -1,1 +1,0 @@
-[![CircleCI](https://circleci.com/gh/Subash/js-concat.svg?style=svg)](https://circleci.com/gh/Subash/js-concat)

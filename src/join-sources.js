@@ -1,9 +1,19 @@
-const path = require('path');
-const slash = require('slash');
+const path = require('node:path');
 const { SourceMapConsumer, SourceNode } = require('source-map');
+
 const REGX_APPEND = /\/\/(\s+|)@(prepros-|codekit-|)append/;
 const REGX_PREPEND = /\/\/(\s+|)@(prepros-|codekit-|)prepend/;
 const REGX_SOURCEMAP = /\/\/(\s+|)[@#](\s+|)sourceMappingURL=/;
+
+
+/**
+ * Replaces all backslashes with forward slashes in a given path.
+ * @param {string} path - The path to be processed.
+ * @returns {string} The processed path.
+ */
+function slash(path) {
+  return path.replaceAll('\\', '/');
+}
 
 /**
  *

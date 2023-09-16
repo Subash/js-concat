@@ -1,8 +1,6 @@
-const fs = require('fs');
-const { promisify } = require('util');
+const { readFile } = require('node:fs/promises');
 const Resolver = require('./resolver');
 const joinSources = require('./join-sources');
-const readFile = promisify(fs.readFile.bind(fs));
 
 async function readCodeMap(file, readMap) {
   const code = await readFile(file, 'utf-8');
