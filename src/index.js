@@ -41,7 +41,10 @@ export default async function concat(code, options = {}) {
   const map = options.inputSourceMap;
   const sourceMap = options.sourceMap || false;
   const rootDir = options.rootDir;
+  const output = options.output;
+
+  if(!output) throw new Error('`output` is required');
 
   const sources = await getSources({ file, code, map, rootDir, readMap: sourceMap });
-  return await joinSources(sources, { sourceMap });
+  return await joinSources(sources, { output, sourceMap });
 }

@@ -1,4 +1,5 @@
 import { SourceMapConsumer, SourceNode } from 'source-map';
+import path from 'node:path';
 
 const REGX_APPEND = /\/\/(\s+|)@(prepros-|codekit-|)append/;
 const REGX_PREPEND = /\/\/(\s+|)@(prepros-|codekit-|)prepend/;
@@ -35,9 +36,10 @@ async function joinWithoutSourceMap(sources) {
  * @param {string} sources[].code Source code to join
  * @param {string} sources[].map Sourcemap of the code
  * @param {string} sources[].file Full path of the file
+ * @param {string} output Output path of the file used for source map url
  */
 
-async function joinWithSourceMap(sources) {
+async function joinWithSourceMap(sources, output) {
   const result = new SourceNode();
   for(const source of sources) {
     let inputMap = source.map? await new SourceMapConsumer(source.map): null;
@@ -54,14 +56,16 @@ async function joinWithSourceMap(sources) {
         let position = {
           line: lineIndex + 1,
           column: columnIndex + 1,
-          source: slash(source.file)
+          source: slash(path.relative(path.dirname(output), source.file)) // make source paths relative
         };
 
         // get original position
         if(inputMap) {
           const originalPosition = inputMap.originalPositionFor({ line: position.line, column: position.column });
           if(originalPosition && originalPosition.source) {
-            position = { line: originalPosition.line, column: originalPosition.column, source: slash(originalPosition.source) };
+            let originalSource = path.resolve(path.dirname(source.file), originalPosition.source); // get absolute path of the source file
+            originalSource = slash(path.relative(path.dirname(output), originalSource)); // make source relative to the new output file
+            position = { line: originalPosition.line, column: originalPosition.column, source: originalSource };
           }
         }
 
@@ -77,10 +81,13 @@ async function joinWithSourceMap(sources) {
     if(inputMap) inputMap.destroy();
   }
 
+  // add source mapping url
+  result.add(`//# sourceMappingURL=${path.basename(output)}.map`);
+
   return result.toStringWithSourceMap();
 }
 
-export default async function joinSources(sources, { sourceMap }) {
-  if(sourceMap) return await joinWithSourceMap(sources);
+export default async function joinSources(sources, { output, sourceMap }) {
+  if(sourceMap) return await joinWithSourceMap(sources, output);
   return { code: await joinWithoutSourceMap(sources), map: null };
 }
