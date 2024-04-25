@@ -30,4 +30,3 @@ console.log('test-b line 8');
 
 console.log('test-c line 4');
 
-//# sourceMappingURL=test.js.map

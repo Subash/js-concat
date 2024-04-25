@@ -36,7 +36,7 @@ async function joinWithoutSourceMap(sources) {
  * @param {string} sources[].code Source code to join
  * @param {string} sources[].map Sourcemap of the code
  * @param {string} sources[].file Full path of the file
- * @param {string} output Output path of the file used for source map url
+ * @param {string} output Output path of the file used for source map
  */
 
 async function joinWithSourceMap(sources, output) {
@@ -64,7 +64,7 @@ async function joinWithSourceMap(sources, output) {
           const originalPosition = inputMap.originalPositionFor({ line: position.line, column: position.column });
           if(originalPosition && originalPosition.source) {
             let originalSource = path.resolve(path.dirname(source.file), originalPosition.source); // get absolute path of the source file
-            originalSource = slash(path.relative(path.dirname(output), originalSource)); // make source relative to the new output file
+            originalSource = slash(path.relative(path.dirname(output), originalSource)); // make source relative to the output file
             position = { line: originalPosition.line, column: originalPosition.column, source: originalSource };
           }
         }
@@ -80,9 +80,6 @@ async function joinWithSourceMap(sources, output) {
     // instances of SourceMapConsumer must be destroyed after use
     if(inputMap) inputMap.destroy();
   }
-
-  // add source mapping url
-  result.add(`//# sourceMappingURL=${path.basename(output)}.map`);
 
   return result.toStringWithSourceMap();
 }
