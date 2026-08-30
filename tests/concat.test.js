@@ -1,7 +1,10 @@
-const compile = require('../lib').default;
-const fs = require('node:fs');
-const path = require('node:path');
-const fixtures = path.resolve(__dirname, 'fixtures');
+import { expect, test } from '@jest/globals';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import compile from '../lib/index.js';
+
+const fixtures = path.resolve(path.dirname(fileURLToPath(import.meta.url)), 'fixtures');
 
 test('Test compile with sourcemap', async ()=> {
   const file = path.resolve(fixtures, 'input/test.js');

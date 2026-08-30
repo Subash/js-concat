@@ -1,6 +1,6 @@
 import { readFile } from 'node:fs/promises';
-import Resolver from './resolver';
-import joinSources from './join-sources';
+import Resolver from './resolver.js';
+import joinSources from './join-sources.js';
 
 async function readCodeMap(file, readMap) {
   const code = await readFile(file, 'utf-8');
