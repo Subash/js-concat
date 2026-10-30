@@ -2,6 +2,7 @@ import { expect, test } from '@jest/globals';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { SourceMapConsumer } from 'source-map';
 import compile from '../lib/index.js';
 
 const fixtures = path.resolve(path.dirname(fileURLToPath(import.meta.url)), 'fixtures');
@@ -15,6 +16,33 @@ test('Test compile with sourcemap', async ()=> {
   // fs.writeFileSync(output + '.map', result.map);
   expect(result.code).toBe(fs.readFileSync(output, 'utf-8'));
   expect(JSON.parse(result.map.toString()).mappings).toBe(JSON.parse(fs.readFileSync(`${output}.map`, 'utf-8')).mappings);
+});
+
+test('Test sourcemap positions map back to the original columns', async ()=> {
+  const file = path.resolve(fixtures, 'input/test.js');
+  const output = path.resolve(fixtures, 'output/test.js');
+  const result = await compile('let a;\n  let = = 2;', { file, output, sourceMap: true });
+  const position = await SourceMapConsumer.with(result.map.toString(), null, (consumer) => {
+    return consumer.originalPositionFor({ line: 2, column: 8 });
+  });
+  expect(position).toMatchObject({ source: '../input/test.js', line: 2, column: 8 });
+});
+
+test('Test sourcemap positions map through input sourcemaps', async ()=> {
+  const file = path.resolve(fixtures, 'input/test.js');
+  const output = path.resolve(fixtures, 'output/test.js');
+  const coffee = path.resolve(fixtures, 'input/coffee/coffee.js');
+  const result = await compile(`// @prepros-prepend 'coffee/coffee.js'`, { file, output, sourceMap: true });
+  const code = fs.readFileSync(coffee, 'utf-8').split('\n')[3];
+  const line = result.code.split('\n').indexOf(code) + 1;
+  const columns = [...code].map((_, column) => column).filter((column) => code[column] !== ' ');
+  const expected = await SourceMapConsumer.with(fs.readFileSync(`${coffee}.map`, 'utf-8'), null, (consumer) => {
+    return columns.map((column) => consumer.originalPositionFor({ line: 4, column })).map(({ line, column }) => [line, column]);
+  });
+  const actual = await SourceMapConsumer.with(result.map.toString(), null, (consumer) => {
+    return columns.map((column) => consumer.originalPositionFor({ line, column })).map(({ line, column }) => [line, column]);
+  });
+  expect(actual).toEqual(expected);
 });
 
 test('Test compile without sourcemap', async ()=> {

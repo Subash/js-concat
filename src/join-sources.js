@@ -55,7 +55,7 @@ async function joinWithSourceMap(sources, output) {
       for(const [columnIndex, column] of line.split('').entries()) {
         let position = {
           line: lineIndex + 1,
-          column: columnIndex + 1,
+          column: columnIndex,
           source: slash(path.relative(path.dirname(output), source.file)) // make source paths relative
         };
 
