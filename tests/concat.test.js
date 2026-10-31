@@ -128,3 +128,29 @@ test('Test no options', async ()=> {
     expect(err).toBeTruthy();
   }
 });
+
+test('Test sources report the output lines of each concatenated file', async ()=> {
+  const file = path.resolve(fixtures, 'input/test.js');
+  const output = path.resolve(fixtures, 'output/test.js');
+  const coffee = path.resolve(fixtures, 'input/coffee/coffee.js');
+  const code = `// @prepros-prepend 'coffee/coffee.js'\nconsole.log('entry');`;
+
+  for(const sourceMap of [true, false]) {
+    const result = await compile(code, { file, output, sourceMap });
+    const lines = result.code.split('\n');
+    const coffeeLines = fs.readFileSync(coffee, 'utf-8').split('\n').filter((line)=> !line.includes('sourceMappingURL='));
+    expect(result.sources).toEqual([
+      { file: coffee, start: 1, end: coffeeLines.length },
+      { file, start: coffeeLines.length + 1, end: coffeeLines.length + 1 }
+    ]);
+    expect(lines.slice(0, coffeeLines.length)).toEqual(coffeeLines);
+    expect(lines[coffeeLines.length]).toBe(`console.log('entry');`);
+  }
+});
+
+test('Test sources skip files without output lines when joining with a sourcemap', async ()=> {
+  const file = path.resolve(fixtures, 'input/test.js');
+  const output = path.resolve(fixtures, 'output/test.js');
+  const result = await compile(`// @prepros-prepend 'test-a.js'`, { file, output, sourceMap: true });
+  expect(result.sources.map((source)=> source.file)).toEqual([path.resolve(fixtures, 'input/test-a.js')]);
+});

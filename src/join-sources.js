@@ -15,19 +15,39 @@ function slash(path) {
 }
 
 /**
+ * Records the output lines that came from a source file.
+ * @param {Object[]} ranges List of line ranges to add to
+ * @param {string} file Full path of the file
+ * @param {number} start First output line of the source
+ * @param {number} lines Number of output lines from the source
+ */
+function addRange(ranges, file, start, lines) {
+  if(lines > 0) ranges.push({ file, start, end: start + lines - 1 });
+}
+
+/**
  *
  * @param {Object[]} sources List of sources to join
  * @param {string} sources[].code Source code to join
  * @param {string} sources[].file Full path of the file
  */
 async function joinWithoutSourceMap(sources) {
-  return sources.map(source=> {
-    return source.code.split('\n')
+  const ranges = [];
+  let line = 1;
+
+  const code = sources.map(source=> {
+    const lines = source.code.split('\n')
       .filter(line=> !REGX_APPEND.test(line)) // remove append statements
       .filter(line=> !REGX_PREPEND.test(line)) // remove prepend statements
-      .filter(line=> !REGX_SOURCEMAP.test(line)) // remove sourcemap statements
-      .join('\n'); // join lines back
+      .filter(line=> !REGX_SOURCEMAP.test(line)); // remove sourcemap statements
+
+    const count = Math.max(lines.length, 1); // an empty source still takes a line when sources are joined
+    addRange(ranges, source.file, line, count);
+    line += count;
+    return lines.join('\n'); // join lines back
   }).join('\n'); // join sources with a new line
+
+  return { code, sources: ranges };
 }
 
 /**
@@ -40,9 +60,13 @@ async function joinWithoutSourceMap(sources) {
  */
 
 async function joinWithSourceMap(sources, output) {
+  let outputLine = 1;
+  const ranges = [];
   const result = new SourceNode();
+
   for(const source of sources) {
     let inputMap = source.map? await new SourceMapConsumer(source.map): null;
+    const start = outputLine;
 
     // iterate over each line
     for(const [lineIndex, line] of source.code.split('\n').entries()) {
@@ -75,16 +99,20 @@ async function joinWithSourceMap(sources, output) {
 
       // add new line at the end of each line
       result.add('\n');
+      outputLine++;
     }
+
+    addRange(ranges, source.file, start, outputLine - start); // record the lines added from this source
 
     // instances of SourceMapConsumer must be destroyed after use
     if(inputMap) inputMap.destroy();
   }
 
-  return result.toStringWithSourceMap();
+  const { code, map } = result.toStringWithSourceMap();
+  return { code, map, sources: ranges };
 }
 
 export default async function joinSources(sources, { output, sourceMap }) {
   if(sourceMap) return await joinWithSourceMap(sources, output);
-  return { code: await joinWithoutSourceMap(sources), map: null };
+  return { ...await joinWithoutSourceMap(sources), map: null };
 }

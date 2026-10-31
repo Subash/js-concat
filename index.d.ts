@@ -6,9 +6,19 @@ export interface ConcatOptions {
   inputSourceMap?: string;
 }
 
+export interface ConcatSource {
+  file: string;
+  start: number;
+  end: number;
+}
+
 export interface ConcatResult {
   code: string;
   map?: string;
+  sources: ConcatSource[];
 }
 
-export default function concat(code: string, options: ConcatOptions): Promise<ConcatResult>;
+export default function concat(
+  code: string,
+  options: ConcatOptions,
+): Promise<ConcatResult>;
