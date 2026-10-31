@@ -1,6 +1,6 @@
 {
   "name": "js-concat",
-  "version": "9.0.1",
+  "version": "9.1.0",
   "type": "module",
   "license": "MIT",
   "description": "Concatenate js files with sourcemaps.",
