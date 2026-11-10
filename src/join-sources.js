@@ -64,9 +64,14 @@ async function joinWithSourceMap(sources, output) {
   const ranges = [];
   const result = new SourceNode();
 
+  const outputDir = path.dirname(output);
+  const relativeTo = file=> slash(path.relative(outputDir, file));
+
   for(const source of sources) {
     let inputMap = source.map? await new SourceMapConsumer(source.map): null;
     const start = outputLine;
+    const originalSources = new Map();
+    const sourcePath = relativeTo(source.file);
 
     // iterate over each line
     for(const [lineIndex, line] of source.code.split('\n').entries()) {
@@ -77,18 +82,19 @@ async function joinWithSourceMap(sources, output) {
 
       // iterate over each character in line
       for(const [columnIndex, column] of line.split('').entries()) {
-        let position = {
-          line: lineIndex + 1,
-          column: columnIndex,
-          source: slash(path.relative(path.dirname(output), source.file)) // make source paths relative
-        };
+        let position = { line: lineIndex + 1, column: columnIndex, source: sourcePath };
 
         // get original position
         if(inputMap) {
           const originalPosition = inputMap.originalPositionFor({ line: position.line, column: position.column });
           if(originalPosition && originalPosition.source) {
-            let originalSource = path.resolve(path.dirname(source.file), originalPosition.source); // get absolute path of the source file
-            originalSource = slash(path.relative(path.dirname(output), originalSource)); // make source relative to the output file
+            let originalSource = originalSources.get(originalPosition.source);
+
+            if(originalSource === undefined) {
+              originalSource = relativeTo(path.resolve(path.dirname(source.file), originalPosition.source));
+              originalSources.set(originalPosition.source, originalSource);
+            }
+
             position = { line: originalPosition.line, column: originalPosition.column, source: originalSource };
           }
         }
